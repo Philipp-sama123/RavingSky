@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Rectangle;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class MarioClone extends ApplicationAdapter {
+public class RavingSky extends ApplicationAdapter {
     public static final int PLAYER_JUMP_HEIGHT = 125;
     public static final int COIN_SPAWN_FREQUENCY = 100;
     public static final int BOMB_SPAWN_FREQUENCY = 250;
