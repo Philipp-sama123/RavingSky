@@ -14,16 +14,10 @@ public class WelcomeScreen implements Screen {
     private RavingSky ravingSkyGame;
     private SpriteBatch batch;
     private Texture background;
-    TextButton playButton;
-    TextButton.TextButtonStyle playButtonStyle;
 
     public WelcomeScreen(RavingSky ravingSkyGame) {
         this.ravingSkyGame = ravingSkyGame;
         batch = new SpriteBatch();
-        background = new Texture((TextureData) Color.BLUE);
-playButtonStyle = new TextButton.TextButtonStyle();
-        playButton = new TextButton("Start the Game",playButtonStyle);
-
     }
 
     @Override
