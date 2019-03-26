@@ -1,8 +1,10 @@
 package philipp.stampfer.mygdx.game;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import philipp.stampfer.mygdx.game.Screens.GameScreen;
+import philipp.stampfer.mygdx.game.Screens.WelcomeScreen;
 
 public class RavingSky extends Game {
     //todo extract to data class/data structure
@@ -14,13 +16,14 @@ public class RavingSky extends Game {
 
     public static final int COIN_VELOCITY_IN_PX = 4;
     public static final int BOMB_VELOCITY_IN_PX = 6;
-
+    public SpriteBatch batch;
 
     @Override
     public void create() {
-
+        batch = new SpriteBatch();
+        setScreen(new WelcomeScreen(this));
         //todo handle game Screens here (switch/case) -- pass parameters!!
-        setScreen(new GameScreen(this));
+        //     setScreen(new GameScreen(this));
     }
 
     @Override
