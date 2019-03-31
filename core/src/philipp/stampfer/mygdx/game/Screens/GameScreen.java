@@ -34,7 +34,7 @@ public class GameScreen implements Screen {
     private int bombCount;
     private int coinCount;
 
-    private int gameState = 0; // todo extract
+    private int gameState = 0; // todo extract?!
 
     private int score = 0;
 

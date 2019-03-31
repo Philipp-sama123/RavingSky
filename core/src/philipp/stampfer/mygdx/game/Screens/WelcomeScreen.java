@@ -29,13 +29,13 @@ public class WelcomeScreen implements Screen {
         batch = new SpriteBatch();
         background = new Texture("bg.png");
 
-        gameCamera = new OrthographicCamera();
+        //   gameCamera = new OrthographicCamera();
 
         //create a FitViewport to maintain virtual acpect ratio
-        gameViewport = new FitViewport(VISUAL_WIDTH, VISUAL_HEIGHT, gameCamera);
-        gameViewport.apply();
-        gameCamera.position.set(gameViewport.getWorldWidth() / 2, gameViewport.getWorldHeight() / 2, 0);
-        stage = new Stage(gameViewport);
+        // gameViewport = new FitViewport(VISUAL_WIDTH, VISUAL_HEIGHT, gameCamera);
+        //  gameViewport.apply();
+        //  gameCamera.position.set(gameViewport.getWorldWidth() / 2, gameViewport.getWorldHeight() / 2, 0);
+        //   stage = new Stage(gameViewport);
     }
 
     @Override
@@ -45,17 +45,16 @@ public class WelcomeScreen implements Screen {
 
     public void update(float dt) {
         handleInput(dt);
-        gameCamera.update();
+        //   gameCamera.update();
 
     }
 
     private void handleInput(float dt) {
         if (Gdx.input.isTouched()) {
             Gdx.app.log("TOUCH", "touched");
-            // TODO: 26.03.19 find out why it looks different!!  
             ravingSkyGame.setScreen(new GameScreen(ravingSkyGame));
         }
-        
+
     }
 
     @Override
@@ -65,13 +64,13 @@ public class WelcomeScreen implements Screen {
         update(delta);
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        ravingSkyGame.batch.setProjectionMatrix(stage.getCamera().combined);
+//        ravingSkyGame.batch.setProjectionMatrix(stage.getCamera().combined);
         batch.end();
     }
 
     @Override
     public void resize(int width, int height) {
-        gameViewport.update(width, height);
+//        gameViewport.update(width, height);
     }
 
     @Override
