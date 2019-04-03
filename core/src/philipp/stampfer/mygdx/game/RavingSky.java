@@ -13,9 +13,17 @@ public class RavingSky extends Game {
 
     public static final int COIN_SPAWN_FREQUENCY = 100;
     public static final int BOMB_SPAWN_FREQUENCY = 250;
+    public static final int MUSHROOM_SPAWN_FREQUENCY = 1000;
+
+    public static final float AWESOME_SPAWN_MULTIPLIER_FREQUENCY = 1 / 3f;
 
     public static final int COIN_VELOCITY_IN_PX = 4;
     public static final int BOMB_VELOCITY_IN_PX = 6;
+    public static final int MUSHROOM_VELOCITY_IN_PX = 8;
+
+    public static final int AWESOME_VELOCITY_MULTIPLIER_IN_PX = 5;
+
+
     public SpriteBatch batch;
 
     @Override
@@ -33,5 +41,6 @@ public class RavingSky extends Game {
 
     @Override
     public void dispose() {
+        batch.dispose();
     }
 }
