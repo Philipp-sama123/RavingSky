@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import philipp.stampfer.mygdx.game.RavingSky;
+import philipp.stampfer.mygdx.game.Sprites.Item;
 
 public class GameScreen implements Screen {
     private RavingSky ravingSkyGame;
@@ -46,7 +47,8 @@ public class GameScreen implements Screen {
     private ArrayList<Integer> coinXs = new ArrayList<Integer>();
     private ArrayList<Integer> coinYs = new ArrayList<Integer>();
     private ArrayList<Rectangle> coinRectangles = new ArrayList<Rectangle>();
-
+    private Item coinItem;
+    private Item bombItem;
     private ArrayList<Integer> bombXs = new ArrayList<Integer>();
     private ArrayList<Integer> bombYs = new ArrayList<Integer>();
     private ArrayList<Rectangle> bombRectangles = new ArrayList<Rectangle>();
@@ -75,10 +77,11 @@ public class GameScreen implements Screen {
 
         offScreenRectangle = new Rectangle(-Gdx.graphics.getWidth(), 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        coin = new Texture("coin.png");
-        bomb = new Texture("bomb.png");
-        mushroom = new Texture("mushroom.png");
+        //coin = new Texture("coin.png");
+        coinItem = new Item(new Texture("coin.png"), true);
+        bombItem = new Item(new Texture("bomb.png"), false);
 
+        mushroom = new Texture("mushroom.png");
         dizzyMainCharacter = new Texture("dizzy-1.png");
         randomValue = new Random();
 
@@ -97,17 +100,16 @@ public class GameScreen implements Screen {
         batch.begin();
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-
         if (gameState == 0) {
             if (Gdx.input.justTouched()) {
                 gameState = 1;
             }
         } else if (gameState == 1) {
 
-
-            // better .. approach would be ?
-            spawnCoin();
-            spawnBomb();
+            coinItem.spawnItem();
+            bombItem.spawnItem();
+            coinItem.updateItemState(isMainCharacterAwesome);
+            bombItem.updateItemState(isMainCharacterAwesome);
             spawnMushroom();
 
             makePlayer();
@@ -120,48 +122,8 @@ public class GameScreen implements Screen {
                 gravity = 5f;
             }
 
-            coinRectangles.clear(); // clears everything from the list
-            for (int i = 0; i < coinXs.size(); i++) {
-
-
-                batch.draw(coin, coinXs.get(i), coinYs.get(i));
-                //bad style
-                int coinVelocity;
-                if (isMainCharacterAwesome) {
-                    coinVelocity = RavingSky.COIN_VELOCITY_IN_PX * RavingSky.AWESOME_VELOCITY_MULTIPLIER_IN_PX;
-                    coinXs.set(i, coinXs.get(i) - coinVelocity);
-                } else {
-                    coinVelocity = RavingSky.COIN_VELOCITY_IN_PX;
-                    coinXs.set(i, coinXs.get(i) - coinVelocity);
-                }
-
-                coinRectangles.add(new Rectangle(
-                        coinXs.get(i),
-                        coinYs.get(i),
-                        coin.getWidth(),
-                        coin.getHeight()
-                ));
-            }
-
-            bombRectangles.clear(); // bomb class ?!
-            for (int i = 0; i < bombXs.size(); i++) {
-
-                batch.draw(bomb, bombXs.get(i), bombYs.get(i));
-
-                if (isMainCharacterAwesome) {
-                    bombXs.set(i, bombXs.get(i) - RavingSky.BOMB_VELOCITY_IN_PX * RavingSky.AWESOME_VELOCITY_MULTIPLIER_IN_PX);
-                } else {
-                    bombXs.set(i, bombXs.get(i) - RavingSky.BOMB_VELOCITY_IN_PX);
-                }
-
-
-                bombRectangles.add(new Rectangle(
-                        bombXs.get(i),
-                        bombYs.get(i),
-                        bomb.getWidth(),
-                        bomb.getHeight()
-                ));
-            }
+            coinItem.drawItemOnScreen(isMainCharacterAwesome, batch);
+            bombItem.drawItemOnScreen(isMainCharacterAwesome, batch);
 
             mushroomRectangles.clear();
             for (int i = 0; i < mushroomXs.size(); i++) {
@@ -199,32 +161,18 @@ public class GameScreen implements Screen {
                 mainCharacterY = 0;
             }
 
-
-            for (int i = 0; i < coinRectangles.size(); i++) {
-                if (Intersector.overlaps(mainCharacterRectangle, coinRectangles.get(i))) {
-                    coinTouched(i);
-                    break;
-                }
-                if (Intersector.overlaps(offScreenRectangle, coinRectangles.get(i))) {
-                    coinOutOfScreen(i);
-                    break;
-                }
+//improve!!
+            if (coinItem.isGoodItem()) {
+                score = coinItem.checkForItemCollision(mainCharacterRectangle, offScreenRectangle, score);
+                bombItem.checkForItemCollision(mainCharacterRectangle, offScreenRectangle, score);
+            } else {
+                gameState = 2;
+                coinItem.checkForItemCollision(mainCharacterRectangle, offScreenRectangle, score);
+                bombItem.checkForItemCollision(mainCharacterRectangle, offScreenRectangle, score);
             }
 
-            for (int i = 0; i < bombRectangles.size(); i++) {
-                if (Intersector.overlaps(mainCharacterRectangle, bombRectangles.get(i))) {
-                    Gdx.app.log("Bomb", "collision");
-                    if (!isMainCharacterAwesome)
-                        gameState = 2; //print immortaaal
-                    else
-                        break;
-                }
-                if (Intersector.overlaps(offScreenRectangle, bombRectangles.get(i))) {
-                    bombOutOfScreen(i);
-                    break;
-                }
-
-
+            if (bombItem.isKillPlayer()) {
+                gameState = 2;
             }
 
             for (int i = 0; i < mushroomRectangles.size(); i++) {
@@ -293,9 +241,6 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        ;
-
-
     }
 
     private void makePlayer() {
@@ -306,19 +251,6 @@ public class GameScreen implements Screen {
                 mainCharacter[mainCharacterState].getHeight()
         );
 
-    }
-
-    // abstract classes
-    public void makeCoin() {  // coin class ?!
-        float height = randomValue.nextFloat() * Gdx.graphics.getHeight();
-        coinXs.add(Gdx.graphics.getWidth());
-        coinYs.add((int) height);
-    }
-
-    public void makeBomb() { // bomb class ?!
-        float height = randomValue.nextFloat() * Gdx.graphics.getHeight();
-        bombXs.add(Gdx.graphics.getWidth());
-        bombYs.add((int) height);
     }
 
     private void makeMushroom() {
@@ -343,24 +275,6 @@ public class GameScreen implements Screen {
 
     }
 
-    private void spawnCoin() {
-        if (coinCount < RavingSky.COIN_SPAWN_FREQUENCY) {
-            coinCount++;
-        } else {
-            coinCount = 0;
-            makeCoin();
-        }
-    }
-
-    private void spawnBomb() {
-        if (bombCount < RavingSky.BOMB_SPAWN_FREQUENCY) {
-            bombCount++;
-        } else {
-            bombCount = 0;
-            makeBomb();
-        }
-    }
-
     private void spawnMushroom() {
         if (mushroomCount < RavingSky.MUSHROOM_SPAWN_FREQUENCY) {
             mushroomCount++;
@@ -368,40 +282,6 @@ public class GameScreen implements Screen {
             mushroomCount = 0;
             makeMushroom();
         }
-    }
-
-
-    private void removeCoins() {
-        coinXs.clear();
-        coinYs.clear();
-        coinRectangles.clear();
-        coinCount = 0;
-    }
-
-    private void removeBombs() {
-        bombXs.clear();
-        bombYs.clear();
-        bombRectangles.clear();
-        bombCount = 0;
-    }
-
-    private void removeMushrooms() {
-        mushroomXs.clear();
-        mushroomYs.clear();
-        mushroomRectangles.clear();
-        mushroomCount = 0;
-    }
-
-    private void bombOutOfScreen(int bombOutOfScreenIndex) {
-        bombRectangles.remove(bombOutOfScreenIndex);
-        bombXs.remove(bombOutOfScreenIndex);
-        bombYs.remove(bombOutOfScreenIndex);
-    }
-
-    private void coinOutOfScreen(int coinOutOfScreenIndex) {
-        coinRectangles.remove(coinOutOfScreenIndex);
-        coinXs.remove(coinOutOfScreenIndex);
-        coinYs.remove(coinOutOfScreenIndex);
     }
 
     private void mushroomOutOfScreen(int mushroomOutOfScreenIndex) {
@@ -418,21 +298,14 @@ public class GameScreen implements Screen {
         mushroomYs.remove(touchedMushroom);
     }
 
-    private void coinTouched(int touchedCoin) {
-        Gdx.app.log("Coin", "collision");
-        score++;
-        coinRectangles.remove(touchedCoin);
-        coinXs.remove(touchedCoin);
-        coinYs.remove(touchedCoin);
-    }
-
     private void restartGame() {
         score = 0;
         gameState = 1;
         velocity = 0;
-        removeCoins();
-        removeBombs();
+        coinItem.removeItems();
+        bombItem.removeItems();
         mainCharacterY = Gdx.graphics.getHeight() / 2;
+        isMainCharacterAwesome =false;
     }
 
 }

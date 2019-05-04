@@ -18,13 +18,21 @@ public class Item {
 
     private Texture itemTexture;
 
+    private boolean isGoodItem;
+    private boolean killPlayer;
+    private boolean isMainCharacterAwesome;
+
     public int itemCount;
 
     private Random randomValue;
 
-    public Item(Texture itemTexture) {
+    public Item(Texture itemTexture, boolean isGoodItem) {
         randomValue = new Random();
+        killPlayer = false;
+        isMainCharacterAwesome = false;
+
         this.itemTexture = itemTexture;
+        this.isGoodItem = isGoodItem;
     }
 
     public void makeItem() {//private
@@ -42,16 +50,16 @@ public class Item {
         }
     }
 
-    public void removeItem() {
+    public void removeItems() {
         itemXs.clear();
         itemYs.clear();
         itemRectangles.clear();
         itemCount = 0;
+        killPlayer = false;
     }
 
     public void itemTouched(int touchedItem) {//private
         Gdx.app.log("Item", "collision");
-        // score++;
         itemRectangles.remove(touchedItem);
         itemXs.remove(touchedItem);
         itemYs.remove(touchedItem);
@@ -65,15 +73,12 @@ public class Item {
 
     public void drawItemOnScreen(boolean isMainCharacterAwesome, Batch batch) {
         itemRectangles.clear();
+        this.isMainCharacterAwesome = isMainCharacterAwesome;
         for (int i = 0; i < itemXs.size(); i++) {
 
             batch.draw(itemTexture, itemXs.get(i), itemYs.get(i));
 
-            if (isMainCharacterAwesome) {
-                itemXs.set(i, itemXs.get(i) - RavingSky.BOMB_VELOCITY_IN_PX * RavingSky.AWESOME_VELOCITY_MULTIPLIER_IN_PX);
-            } else {
-                itemXs.set(i, itemXs.get(i) - RavingSky.BOMB_VELOCITY_IN_PX);
-            }
+            setItemVelocity(isMainCharacterAwesome, i);
 
             itemRectangles.add(new Rectangle(
                     itemXs.get(i),
@@ -84,16 +89,53 @@ public class Item {
         }
     }
 
-    public void checkForItemColission(Rectangle mainCharacterRectangle, Rectangle offScreenRectangle){
+    private void setItemVelocity(boolean isMainCharacterAwesome, int i) {
+        this.isMainCharacterAwesome = isMainCharacterAwesome;
+        if (isMainCharacterAwesome) {
+            if (isGoodItem) {
+                itemXs.set(i, itemXs.get(i) - RavingSky.COIN_VELOCITY_IN_PX * RavingSky.AWESOME_VELOCITY_MULTIPLIER_IN_PX);
+            } else {
+                itemXs.set(i, itemXs.get(i) - RavingSky.BOMB_VELOCITY_IN_PX * RavingSky.AWESOME_VELOCITY_MULTIPLIER_IN_PX);
+            }
+        } else {
+            if (isGoodItem) {
+                itemXs.set(i, itemXs.get(i) - RavingSky.COIN_VELOCITY_IN_PX);
+            } else {
+                itemXs.set(i, itemXs.get(i) - RavingSky.BOMB_VELOCITY_IN_PX);
+            }
+        }
+    }
+
+
+    public int checkForItemCollision(Rectangle mainCharacterRectangle, Rectangle offScreenRectangle, int score) {
         for (int i = 0; i < itemRectangles.size(); i++) {
             if (Intersector.overlaps(mainCharacterRectangle, itemRectangles.get(i))) {
                 itemTouched(i);
-                break;
+                score++;
+                if (isGoodItem || isMainCharacterAwesome)
+                    break;
+                else {
+                    killPlayer = true;
+                    break;
+                }
             }
             if (Intersector.overlaps(offScreenRectangle, itemRectangles.get(i))) {
                 itemOutOfScreen(i);
                 break;
             }
         }
+        return score;
+    }
+
+    public boolean isGoodItem() {
+        return isGoodItem;
+    }
+
+    public boolean isKillPlayer() {
+        return killPlayer;
+    }
+
+    public void updateItemState(boolean isMainCharacterAwesome) {
+        this.isMainCharacterAwesome = isMainCharacterAwesome;
     }
 }
